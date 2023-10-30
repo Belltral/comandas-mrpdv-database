@@ -7,12 +7,23 @@ namespace ComandasDB.Data.Internal
     {
         public static void CreateDatabaseIfNoExists()
         {
-            AppDomain.CurrentDomain.SetData("DataDirectory", AppDomain.CurrentDomain.BaseDirectory);
-            Database.SetInitializer(new CreateDatabaseIfNotExists<ComandasMRPDVContext>());
+            string appDataDirectory = AppDomain.CurrentDomain.BaseDirectory + "App_Data";
 
-            using (var db = new ComandasMRPDVContext())
+            try
             {
-                db.Database.Initialize(false);
+                AppDomain.CurrentDomain.SetData("DataDirectory", appDataDirectory);
+
+                Database.SetInitializer(new CreateDatabaseIfNotExists<ComandasMRPDVContext>());
+                using (var db = new ComandasMRPDVContext())
+                {
+                    db.Database.Initialize(false);
+                }
+
+                AppDomain.CurrentDomain.SetData("DataDirectory", AppDomain.CurrentDomain.BaseDirectory);
+            }
+            catch (Exception e)
+            {
+                e.Message.ToString();
             }
         }
     }

@@ -167,12 +167,12 @@ public partial class PreVendas
 
     public decimal? QUILOMETRAGEM_PRVD { get; set; }
 
-    //public override string ToString()
-    //{
-    //    return $"Número da pré venda: {NUMERO_PRVD}\n" +
-    //        $"Número da comanda: {COMANDA_PRVD}\n" +
-    //        $"Cliente: {NOME_PRVD}\n" +
-    //        $"Valor: {VALOR_PRVD}\n" +
-    //        $"=============================================================================";
-    //}
+    public override string ToString()
+    {
+        return $"Número da pré venda: {NUMERO_PRVD}\n" +
+            $"Número da comanda: {COMANDA_PRVD}\n" +
+            $"Cliente: {NOME_PRVD}\n" +
+            $"Valor: {VALOR_PRVD}\n" +
+            $"=============================================================================";
+    }
 }
