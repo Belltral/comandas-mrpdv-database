@@ -67,9 +67,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comandas.cs" />
+    <Compile Include="Data\Comanda.cs" />
     <Compile Include="Data\ComandasMRPDVContext.cs" />
     <Compile Include="Data\DataMRPDVContext.cs" />
-    <Compile Include="Data\Internal\CreateDatabase.cs" />
     <Compile Include="Data\Internal\RetrieveFromMRPDV.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tables\ItensPreVendas.cs" />
