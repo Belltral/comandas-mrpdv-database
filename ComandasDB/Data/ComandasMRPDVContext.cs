@@ -1,10 +1,26 @@
+using System;
 using System.Data.Entity;
+using System.IO;
 
 public partial class ComandasMRPDVContext : DbContext
 {
     public ComandasMRPDVContext()
-        : base("name=ComandasMRPDV")
+    : base("name=ComandasMRPDV")
     {
+        string dataDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+        if (!File.Exists($@"{dataDirectory}\App_Data\ComandasMRPDV.MDF"))
+        {
+            try
+            {
+                Database.SetInitializer(new CreateDatabaseIfNotExists<ComandasMRPDVContext>());
+                Database.Initialize(false);
+            }
+            catch (Exception e)
+            {
+                e.Message.ToString();
+            }
+        }
     }
 
     public virtual DbSet<ItensPreVendas> ItensPreVendas { get; set; }
