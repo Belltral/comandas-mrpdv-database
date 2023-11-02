@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ComandasDB.Data.Internal
 {
-    public class RetrieveFromMRPDV
+    internal class RetrieveFromMRPDV
     {
         internal static List<PreVendas> GetPreVendasFromMRPDV()
         {
@@ -39,7 +40,7 @@ namespace ComandasDB.Data.Internal
             return itensPreVendasList;
         }
 
-        public static void RetriveCurrentDataFromMrToComandasDatabase()
+        internal static void RetriveCurrentDataFromMrToComandasDatabase()
         {
             var preVendasList = GetPreVendasFromMRPDV();
             var itensPreVendasList = GetItensPreVendasFromMRPDV();

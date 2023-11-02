@@ -1,3 +1,4 @@
+using ComandasDB.Data.Internal;
 using System;
 using System.Data.Entity;
 using System.IO;
@@ -13,14 +14,23 @@ public partial class ComandasMRPDVContext : DbContext
         {
             try
             {
+                AppDomain.CurrentDomain.SetData("DataDirectory", dataDirectory);
+
                 Database.SetInitializer(new CreateDatabaseIfNotExists<ComandasMRPDVContext>());
                 Database.Initialize(false);
+
+                if (File.Exists($@"{dataDirectory}\App_Data\ComandasMRPDV.MDF"))
+                {
+                    RetrieveFromMRPDV.RetriveCurrentDataFromMrToComandasDatabase();
+                }
             }
             catch (Exception e)
             {
-                e.Message.ToString();
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.InnerException);
             }
         }
+
     }
 
     public virtual DbSet<ItensPreVendas> ItensPreVendas { get; set; }
