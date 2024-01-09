@@ -18,7 +18,7 @@ namespace ComandasDB
         /// Obs.: Pode retornar null.
         /// </returns>
         /// <exception cref="ArgumentException"></exception>
-        public static PreVendas GetPreVendaFromComandasDb(int numeroPreVenda)
+        public static PreVendas GetPreVenda(int numeroPreVenda)
         {
             if (numeroPreVenda <= 0)
             {
@@ -34,27 +34,20 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Localiza todas as comandas da base de dados de comandas.
+        /// Localiza todas as comandas (pré vendas) da base de dados de comandas.
         /// </summary>
         /// <returns>
-        /// <para>Retorna um objeto List de PreVendas iterável da base de comandas.</para>
+        /// <para>Retorna um objeto IEnumerable de PreVendas da base de comandas.</para>
         /// Obs.: Pode retornar um objeto vazio.
         /// </returns>
-        public static List<PreVendas> GetAllPreVendasFromDb()
+        public static IEnumerable<PreVendas> GetPreVendas()
         {
-            List<PreVendas> preVendasList = new List<PreVendas>();
-
             using (var db = new ComandasMRPDVContext())
             {
-                var selectPreVenda = db.PreVendas.Select(s => s);
+                var selectPreVenda = db.PreVendas.Select(s => s).ToList();
 
-                foreach (var preVenda in selectPreVenda)
-                {
-                    preVendasList.Add(preVenda);
-                }
+                return selectPreVenda;
             }
-
-            return preVendasList;
         }
 
         /// <summary>
@@ -62,7 +55,7 @@ namespace ComandasDB
         /// </summary>
         /// <param name="preVenda"></param>
         /// /// <exception cref="ArgumentException"></exception>
-        public static void InsertPreVendaOnComandasDb(PreVendas preVenda)
+        public static void InsertPreVenda(PreVendas preVenda)
         {
             if (preVenda.COMANDA_PRVD <= 0)
             {
@@ -80,54 +73,21 @@ namespace ComandasDB
         /// Localiza os itens de uma pré venda específica através do número de pré venda da base de comandas.
         /// </summary>
         /// <param name="numeroPreVenda"></param>
-        /// <returns>Retorna um objeto List de ItensPreVendas iterável.</returns>
+        /// <returns>Retorna um objeto IEnumerable de ItensPreVendas.</returns>
         /// <exception cref="ArgumentException"></exception>
-        public static List<ItensPreVendas> GetItensPreVendaByNumberOfPreVenda(int numeroPreVenda)
+        public static IEnumerable<ItensPreVendas> GetItensFromPreVenda(int numeroPreVenda)
         {
             if (numeroPreVenda <= 0)
             {
                 throw new ArgumentException();
             }
 
-            List<ItensPreVendas> itensPreVendaList = new List<ItensPreVendas>();
-
             using (var db = new ComandasMRPDVContext())
             {
-                var itens = db.ItensPreVendas.Select(s => s).Where(n => n.NUMERO_PRVD == numeroPreVenda);
+                var itens = db.ItensPreVendas.Select(s => s).Where(n => n.NUMERO_PRVD == numeroPreVenda).ToList();
 
-                foreach (var item in itens)
-                {
-                    itensPreVendaList.Add(item);
-                }
+                return itens;
             }
-
-            return itensPreVendaList;
-        }
-
-        /// <summary>
-        /// <para>Localiza todos os itens de todas as pré vendas da base de comandas.</para>
-        /// </summary>
-        /// <returns>
-        /// <para>Retorna um objeto List de PreVendas com todas as pré vendas da base de comandas</para>
-        /// Obs.: Pode retornar um objeto vazio.
-        /// </returns>
-        public static List<ItensPreVendas> GetAllItensFromPreVendas()
-        {
-            List<ItensPreVendas> itensPreVendasList = new List<ItensPreVendas>();
-
-            using (var db = new ComandasMRPDVContext())
-            {
-                ItensPreVendas itensPreVendas = new ItensPreVendas();
-
-                var selectFromComandas = db.ItensPreVendas.Select(s => s);
-
-                foreach (var item in selectFromComandas)
-                {
-                    itensPreVendasList.Add(item);
-                }
-            }
-
-            return itensPreVendasList;
         }
 
         /// <summary>
@@ -135,7 +95,7 @@ namespace ComandasDB
         /// </summary>
         /// <param name="itensPreVenda"></param>
         /// <exception cref="ArgumentException"></exception>
-        public static void InsertItensPreVendaOnComandasDb(List<ItensPreVendas> itensPreVenda)
+        public static void InsertItensOfPreVenda(List<ItensPreVendas> itensPreVenda)
         {
             if (itensPreVenda.Count() == 0)
             {
@@ -144,10 +104,8 @@ namespace ComandasDB
 
             using (var db = new ComandasMRPDVContext())
             {
-                foreach (var item in itensPreVenda)
-                {
-                    db.ItensPreVendas.Add(item);
-                }
+                itensPreVenda.Select(i => db.ItensPreVendas.Add(i));
+
                 db.SaveChanges();
             }
         }
@@ -169,36 +127,29 @@ namespace ComandasDB
                 throw new ArgumentException();
             }
 
-            Comanda comanda = new Comanda();
-
             using (var db = new ComandasMRPDVContext())
             {
-                var queryPreVenda = (from preVenda in db.PreVendas
-                                    where preVenda.COMANDA_PRVD == numeroComanda
-                                    select preVenda).FirstOrDefault();
+                var queryPreVenda = db.PreVendas.FirstOrDefault(p => p.COMANDA_PRVD == numeroComanda);
 
-                var queryItens = from preVendas in db.PreVendas
-                            join itensPreVendas in db.ItensPreVendas on preVendas.NUMERO_PRVD equals itensPreVendas.NUMERO_PRVD
-                            where preVendas.COMANDA_PRVD == numeroComanda
-                            select new
-                            {
-                                PreVenda = preVendas, ItensPreVendas = itensPreVendas
-                            };
+                var queryItens = db.PreVendas
+                                .Join(
+                                    db.ItensPreVendas,
+                                    p => p.NUMERO_PRVD,
+                                    i => i.NUMERO_PRVD,
+                                    (p, i) => new {PreVendas = p, ItensPreVendas = i}
+                                )
+                                .Where(p => p.PreVendas.COMANDA_PRVD == numeroComanda);
 
                 if (queryPreVenda != null && queryItens.Count() > 0)
                 {
-                    List<ItensPreVendas> itensList = new List<ItensPreVendas>();
+                    ICollection<ItensPreVendas> itens = new List<ItensPreVendas>();
 
                     foreach (var item in queryItens)
                     {
-                        itensList.Add(item.ItensPreVendas);
+                        itens.Add(item.ItensPreVendas);
                     }
 
-                    comanda.ItensPreVenda = itensList;
-
-                    comanda.PreVenda = queryPreVenda;
-
-                    return comanda;
+                    return new Comanda(queryPreVenda, itens);
                 }
             }
 

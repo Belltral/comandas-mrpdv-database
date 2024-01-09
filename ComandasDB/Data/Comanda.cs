@@ -5,8 +5,16 @@ namespace ComandasDB.Data
 {
     public class Comanda 
     {
-        public PreVendas PreVenda { get; set; }
-        public List<ItensPreVendas> ItensPreVenda { get; set; }
+        public PreVendas PreVenda { get; private set; }
+        public ICollection<ItensPreVendas> ItensPreVenda { get; private set; }
+
+        public Comanda(PreVendas preVenda, ICollection<ItensPreVendas>itens)
+        {
+            PreVenda = preVenda;
+
+            ItensPreVenda = new List<ItensPreVendas>();
+            ItensPreVenda = itens;
+        }
 
         public override string ToString()
         {
