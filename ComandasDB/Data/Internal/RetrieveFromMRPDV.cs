@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace ComandasDB.Data.Internal
@@ -49,10 +48,10 @@ namespace ComandasDB.Data.Internal
             {
                 foreach (var preVenda in preVendasList)
                 {
-                    Comandas.InsertPreVendaOnComandasDb(preVenda);
+                    Comandas.InsertPreVenda(preVenda);
                 }
 
-                Comandas.InsertItensPreVendaOnComandasDb(itensPreVendasList);
+                Comandas.InsertItensOfPreVenda(itensPreVendasList);
             }
         }
     }
