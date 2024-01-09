@@ -21,7 +21,7 @@ public partial class ComandasMRPDVContext : DbContext
 
                 if (File.Exists($@"{dataDirectory}\App_Data\ComandasMRPDV.MDF"))
                 {
-                    RetrieveFromMRPDV.RetriveCurrentDataFromMrToComandasDatabase();
+                    RetrieveFromMRPDV.RetriveFromMRToComandas();
                 }
             }
             catch (Exception e)

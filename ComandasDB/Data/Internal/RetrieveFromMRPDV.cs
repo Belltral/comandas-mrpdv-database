@@ -39,7 +39,7 @@ namespace ComandasDB.Data.Internal
             return itensPreVendasList;
         }
 
-        internal static void RetriveCurrentDataFromMrToComandasDatabase()
+        internal static void RetriveFromMRToComandas()
         {
             var preVendasList = GetPreVendasFromMRPDV();
             var itensPreVendasList = GetItensPreVendasFromMRPDV();
