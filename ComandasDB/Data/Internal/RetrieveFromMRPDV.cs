@@ -7,7 +7,7 @@ namespace ComandasDB.Data.Internal
     {
         internal static List<PreVendas> GetPreVendasFromMRPDV()
         {
-            List<PreVendas> preVendasList = new List<PreVendas>();
+            List<PreVendas> preVendas = new List<PreVendas>();
 
             using (var db = new DataMRPDVContext())
             {
@@ -15,16 +15,16 @@ namespace ComandasDB.Data.Internal
 
                 foreach (var item in query)
                 {
-                    preVendasList.Add(item);
+                    preVendas.Add(item);
                 }
             }
 
-            return preVendasList;
+            return preVendas;
         }
 
         internal static List<ItensPreVendas> GetItensPreVendasFromMRPDV()
         {
-            List<ItensPreVendas> itensPreVendasList = new List<ItensPreVendas>();
+            List<ItensPreVendas> itensPreVendas = new List<ItensPreVendas>();
 
             using (var db = new DataMRPDVContext())
             {
@@ -32,26 +32,26 @@ namespace ComandasDB.Data.Internal
 
                 foreach (var item in query)
                 {
-                    itensPreVendasList.Add(item);
+                    itensPreVendas.Add(item);
                 }
             }
 
-            return itensPreVendasList;
+            return itensPreVendas;
         }
 
         internal static void RetriveFromMRToComandas()
         {
-            var preVendasList = GetPreVendasFromMRPDV();
-            var itensPreVendasList = GetItensPreVendasFromMRPDV();
+            var preVendas = GetPreVendasFromMRPDV();
+            var itensPreVendas = GetItensPreVendasFromMRPDV();
 
-            if (preVendasList.Count() > 0 && itensPreVendasList.Count() > 0)
+            if (preVendas.Count() > 0 && itensPreVendas.Count() > 0)
             {
-                foreach (var preVenda in preVendasList)
+                foreach (var preVenda in preVendas)
                 {
                     Comandas.InsertPreVenda(preVenda);
                 }
 
-                Comandas.InsertItensOfPreVenda(itensPreVendasList);
+                Comandas.InsertItensOfPreVenda(itensPreVendas);
             }
         }
     }
