@@ -5,14 +5,14 @@ namespace ComandasDB.Data
 {
     public class Comanda 
     {
-        public PreVendas PreVenda { get; private set; }
-        public ICollection<ItensPreVendas> ItensPreVenda { get; private set; }
+        public PreVenda PreVenda { get; private set; }
+        public ICollection<ItensPreVenda> ItensPreVenda { get; private set; }
 
-        public Comanda(PreVendas preVenda, ICollection<ItensPreVendas>itens)
+        public Comanda(PreVenda preVenda, ICollection<ItensPreVenda>itens)
         {
             PreVenda = preVenda;
 
-            ItensPreVenda = new List<ItensPreVendas>();
+            ItensPreVenda = new List<ItensPreVenda>();
             ItensPreVenda = itens;
         }
 

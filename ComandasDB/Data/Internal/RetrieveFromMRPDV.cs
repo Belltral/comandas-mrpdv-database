@@ -5,9 +5,9 @@ namespace ComandasDB.Data.Internal
 {
     internal class RetrieveFromMRPDV
     {
-        internal static List<PreVendas> GetPreVendasFromMRPDV()
+        internal static List<PreVenda> GetPreVendasFromMRPDV()
         {
-            List<PreVendas> preVendas = new List<PreVendas>();
+            List<PreVenda> preVendas = new List<PreVenda>();
 
             using (var db = new DataMRPDVContext())
             {
@@ -22,9 +22,9 @@ namespace ComandasDB.Data.Internal
             return preVendas;
         }
 
-        internal static List<ItensPreVendas> GetItensPreVendasFromMRPDV()
+        internal static List<ItensPreVenda> GetItensPreVendasFromMRPDV()
         {
-            List<ItensPreVendas> itensPreVendas = new List<ItensPreVendas>();
+            List<ItensPreVenda> itensPreVendas = new List<ItensPreVenda>();
 
             using (var db = new DataMRPDVContext())
             {

@@ -12,11 +12,11 @@ namespace ComandasDB
         /// </summary>
         /// <param name="numeroPreVenda">Número da pré venda a ser localizada.</param>
         /// <returns>
-        /// <para>Retorna um objeto PreVendas contendo uma pre venda do banco local da base de comandas.</para>
+        /// <para>Retorna um objeto PreVenda contendo uma pre venda do banco local da base de comandas.</para>
         /// Obs.: Pode retornar null.
         /// </returns>
         /// <exception cref="ArgumentException"></exception>
-        public static PreVendas GetPreVenda(int numeroPreVenda)
+        public static PreVenda GetPreVenda(int numeroPreVenda)
         {
             if (numeroPreVenda <= 0)
             {
@@ -32,13 +32,13 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Localiza todas as comandas (pré vendas) da base de dados de comandas.
+        /// Localiza todas as pré vendas da base de dados de comandas.
         /// </summary>
         /// <returns>
-        /// <para>Retorna um objeto IEnumerable de PreVendas da base de comandas.</para>
+        /// <para>Retorna um objeto IEnumerable de PreVenda da base de comandas.</para>
         /// Obs.: Pode retornar um objeto vazio.
         /// </returns>
-        public static IEnumerable<PreVendas> GetPreVendas()
+        public static IEnumerable<PreVenda> GetPreVendas()
         {
             using (var db = new ComandasMRPDVContext())
             {
@@ -53,7 +53,7 @@ namespace ComandasDB
         /// </summary>
         /// <param name="preVenda">Objeto que contém a pré venda a ser inserida.</param>
         /// /// <exception cref="ArgumentException"></exception>
-        public static void InsertPreVenda(PreVendas preVenda)
+        public static void InsertPreVenda(PreVenda preVenda)
         {
             if (preVenda.COMANDA_PRVD <= 0)
             {
@@ -73,7 +73,7 @@ namespace ComandasDB
         /// <param name="numeroPreVenda">Número da pré venda a ser localizada</param>
         /// <returns>Retorna um objeto IEnumerable de ItensPreVendas.</returns>
         /// <exception cref="ArgumentException"></exception>
-        public static IEnumerable<ItensPreVendas> GetItensFromPreVenda(int numeroPreVenda)
+        public static IEnumerable<ItensPreVenda> GetItensFromPreVenda(int numeroPreVenda)
         {
             if (numeroPreVenda <= 0)
             {
@@ -89,11 +89,11 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Recebe um objeto List de ItensPreVendas para inserir os itens na base de comandas.
+        /// Recebe um objeto List de ItensPreVenda para inserir os itens na base de comandas.
         /// </summary>
         /// <param name="itensPreVenda"></param>
         /// <exception cref="ArgumentException"></exception>
-        public static void InsertItensOfPreVenda(List<ItensPreVendas> itensPreVenda)
+        public static void InsertItensOfPreVenda(List<ItensPreVenda> itensPreVenda)
         {
             if (itensPreVenda.Count() == 0)
             {
@@ -135,14 +135,16 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Faz a atualização dos produtos e valor de uma comanda.
+        /// Faz a atualização dos produtos e valor de uma comanda ou atualiza todos os dados referentes a comanda.
         /// </summary>
-        /// <param name="numeroPreVenda">Número da prevenda da qual a comanda pertence.</param>
-        /// <param name="itensAtualizados">Coleção com os produtos a serem inseridos na comanda.</param>
+        /// <param name="numeroPreVenda">Número da pré venda que será atualizada</param>
+        /// <param name="itensAtualizados">Itens atualizados da comanda. Obrigatórios mesmo que eles não sejam alterados.</param>
+        /// <param name="preVendaAtualizada">Pré venda atualizada caso seja necessário.</param>
         /// <exception cref="ArgumentException"></exception>
-        public static void UpdateItensComanda(int numeroPreVenda, List<ItensPreVendas> itensAtualizados)
+        public static void UpdateComanda(int numeroPreVenda, List<ItensPreVenda> itensAtualizados, 
+            PreVenda preVendaAtualizada = null)
         {
-            if (numeroPreVenda <= 0 || itensAtualizados.Count() <= 0)
+            if (numeroPreVenda <= 0 || itensAtualizados.Count <= 0)
             {
                 throw new ArgumentException();
             }
@@ -150,8 +152,34 @@ namespace ComandasDB
             using (var db = new ComandasMRPDVContext())
             {
                 var oldItens = db.ItensPreVendas.Select(i => i).Where(i => i.NUMERO_PRVD == numeroPreVenda);
-                
                 db.ItensPreVendas.RemoveRange(oldItens);
+
+                if (!(preVendaAtualizada is null))
+                {
+                    var oldPreVenda = db.PreVendas.SingleOrDefault(p => p.NUMERO_PRVD == numeroPreVenda);
+
+                    db.PreVendas.Remove(oldPreVenda);
+
+                    db.PreVendas.Add(preVendaAtualizada);
+
+                    db.SaveChanges();
+
+                    var numeroComanda = preVendaAtualizada.COMANDA_PRVD;
+
+                    var newPreVenda = db.PreVendas.SingleOrDefault(p => p.COMANDA_PRVD == numeroComanda);
+
+                    foreach (var item in itensAtualizados)
+                    {
+                        item.NUMERO_PRVD = newPreVenda.NUMERO_PRVD;
+                    }
+
+                    db.ItensPreVendas.AddRange(itensAtualizados);
+
+                    db.SaveChanges();
+
+                    return;
+                }
+
                 db.ItensPreVendas.AddRange(itensAtualizados);
 
                 decimal? novoValor = 0;
@@ -159,8 +187,9 @@ namespace ComandasDB
                 {
                     novoValor += (valor.PRECO_IPRV * valor.QTDE_IPRV);
                 }
-                var preVenda = db.PreVendas.Select(p => p).Where(p => p.NUMERO_PRVD == numeroPreVenda).ToList();
-                preVenda[0].VALOR_PRVD = novoValor;
+
+                var preVenda = db.PreVendas.SingleOrDefault(p => p.NUMERO_PRVD == numeroPreVenda);
+                preVenda.VALOR_PRVD = novoValor;
 
                 db.SaveChanges();
             }

@@ -72,8 +72,8 @@
     <Compile Include="Data\DataMRPDVContext.cs" />
     <Compile Include="Data\Internal\RetrieveFromMRPDV.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tables\ItensPreVendas.cs" />
-    <Compile Include="Tables\PreVendas.cs" />
+    <Compile Include="Tables\ItensPreVenda.cs" />
+    <Compile Include="Tables\PreVenda.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
