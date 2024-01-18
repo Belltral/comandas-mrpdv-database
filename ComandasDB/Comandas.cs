@@ -35,10 +35,10 @@ namespace ComandasDB
         /// Localiza todas as pré vendas da base de dados de comandas.
         /// </summary>
         /// <returns>
-        /// <para>Retorna um objeto IEnumerable de PreVenda da base de comandas.</para>
+        /// <para>Retorna um objeto List de PreVenda da base de comandas.</para>
         /// Obs.: Pode retornar um objeto vazio.
         /// </returns>
-        public static IEnumerable<PreVenda> GetPreVendas()
+        public static List<PreVenda> GetPreVendas()
         {
             using (var db = new ComandasMRPDVContext())
             {
@@ -49,7 +49,7 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Recebe um objeto PreVendas e realiza a inserção da pré venda na base de comandas.
+        /// Recebe um objeto PreVenda e realiza a inserção da pré venda na base de comandas.
         /// </summary>
         /// <param name="preVenda">Objeto que contém a pré venda a ser inserida.</param>
         /// /// <exception cref="ArgumentException"></exception>
@@ -71,9 +71,11 @@ namespace ComandasDB
         /// Localiza os itens de uma pré venda específica através do número de pré venda da base de comandas.
         /// </summary>
         /// <param name="numeroPreVenda">Número da pré venda a ser localizada</param>
-        /// <returns>Retorna um objeto IEnumerable de ItensPreVendas.</returns>
+        /// <returns>Retorna um objeto List de ItensPreVenda.
+        /// <para>Obs.: Retorna um objeto List de ItensPreVenda vazio se não forem encontrados resultados.</para>
+        /// </returns>
         /// <exception cref="ArgumentException"></exception>
-        public static IEnumerable<ItensPreVenda> GetItensFromPreVenda(int numeroPreVenda)
+        public static List<ItensPreVenda> GetItensFromPreVenda(int numeroPreVenda)
         {
             if (numeroPreVenda <= 0)
             {
@@ -114,7 +116,7 @@ namespace ComandasDB
         /// <param name="numeroComanda">Número da comanda.</param>
         /// <returns>
         ///<para>Retorna um objeto Comanda.</para>
-        /// Obs.: Pode retornar null.
+        /// Obs.: Retorna null se a comanda não for encontrada.
         /// </returns>
         public static Comanda GetComanda(int numeroComanda)
         {
@@ -137,20 +139,30 @@ namespace ComandasDB
         /// <summary>
         /// Faz a atualização dos produtos e valor de uma comanda ou atualiza todos os dados referentes a comanda.
         /// </summary>
-        /// <param name="numeroPreVenda">Número da pré venda que será atualizada</param>
+        /// <param name="numeroComanda">Número da comanda que será atualizada.</param>
         /// <param name="itensAtualizados">Itens atualizados da comanda. Obrigatórios mesmo que eles não sejam alterados.</param>
         /// <param name="preVendaAtualizada">Pré venda atualizada caso seja necessário.</param>
+        /// <returns>Retorna verdadeiro se o procedimento foi efetuado ou falso caso não exista a comanda informada.</returns>
         /// <exception cref="ArgumentException"></exception>
-        public static void UpdateComanda(int numeroPreVenda, List<ItensPreVenda> itensAtualizados, 
+        public static bool UpdateComanda(int numeroComanda, List<ItensPreVenda> itensAtualizados, 
             PreVenda preVendaAtualizada = null)
         {
-            if (numeroPreVenda <= 0 || itensAtualizados.Count <= 0)
+            if (numeroComanda <= 0 || itensAtualizados.Count <= 0)
             {
                 throw new ArgumentException();
             }
 
             using (var db = new ComandasMRPDVContext())
             {
+                var preVenda = db.PreVendas.SingleOrDefault(p => p.COMANDA_PRVD == numeroComanda);
+
+                if (preVenda is null)
+                {
+                    return false;
+                }
+
+                int numeroPreVenda = preVenda.NUMERO_PRVD;
+
                 var oldItens = db.ItensPreVendas.Select(i => i).Where(i => i.NUMERO_PRVD == numeroPreVenda);
                 db.ItensPreVendas.RemoveRange(oldItens);
 
@@ -164,8 +176,6 @@ namespace ComandasDB
 
                     db.SaveChanges();
 
-                    var numeroComanda = preVendaAtualizada.COMANDA_PRVD;
-
                     var newPreVenda = db.PreVendas.SingleOrDefault(p => p.COMANDA_PRVD == numeroComanda);
 
                     foreach (var item in itensAtualizados)
@@ -177,7 +187,7 @@ namespace ComandasDB
 
                     db.SaveChanges();
 
-                    return;
+                    return true;
                 }
 
                 db.ItensPreVendas.AddRange(itensAtualizados);
@@ -188,17 +198,43 @@ namespace ComandasDB
                     novoValor += (valor.PRECO_IPRV * valor.QTDE_IPRV);
                 }
 
-                var preVenda = db.PreVendas.SingleOrDefault(p => p.NUMERO_PRVD == numeroPreVenda);
                 preVenda.VALOR_PRVD = novoValor;
 
                 db.SaveChanges();
+
+                return true;
             }
         }
 
-        //TODO: Exclusão de comanda
-        public static void DeleteComanda()
+        /// <summary>
+        /// Remove uma comanda (pré venda e itens) do banco.
+        /// </summary>
+        /// <param name="numeroComanda">Número da comanda que será removida.</param>
+        /// <returns>Retorna verdadeiro se o procedimento foi efetuado ou falso caso não exista a comanda informada.</returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static bool DeleteComanda(int numeroComanda)
         {
+            if (numeroComanda <= 0)
+            {
+                throw new ArgumentException();
+            }
 
+            using (var db = new ComandasMRPDVContext())
+            {
+                var preVenda = db.PreVendas.SingleOrDefault(p => p.COMANDA_PRVD == numeroComanda);
+                var itensComanda = db.ItensPreVendas.Select(i => i).Where(p => p.NUMERO_PRVD == preVenda.NUMERO_PRVD);
+
+                if (preVenda is null)
+                {
+                    return false;
+                }
+
+                db.PreVendas.Remove(preVenda);
+                db.ItensPreVendas.RemoveRange(itensComanda);
+                db.SaveChanges();
+
+                return true;
+            }
         }
     }
 }
