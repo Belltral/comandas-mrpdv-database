@@ -3,6 +3,10 @@ using System.Linq;
 
 namespace ComandasDB.Data.Internal
 {
+    /// <summary>
+    /// Faz a cópia automática de comandas existentes no PDV para a base
+    /// separada de comandas ao invocar a classe de contexto.
+    /// </summary>
     internal class RetrieveFromMRPDV
     {
         internal static List<PreVenda> GetPreVendasFromMRPDV()

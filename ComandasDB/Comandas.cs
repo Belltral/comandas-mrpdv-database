@@ -5,6 +5,9 @@ using ComandasDB.Data;
 
 namespace ComandasDB
 {
+    /// <summary>
+    /// Objeto que compõe os métodos para manipulação de comandas.
+    /// </summary>
     public class Comandas
     {
         /// <summary>
@@ -93,7 +96,7 @@ namespace ComandasDB
         /// <summary>
         /// Recebe um objeto List de ItensPreVenda para inserir os itens na base de comandas.
         /// </summary>
-        /// <param name="itensPreVenda"></param>
+        /// <param name="itensPreVenda">Objeto List de ItensPreVenda com os itens a serem inseridos.</param>
         /// <exception cref="ArgumentException"></exception>
         public static void InsertItensOfPreVenda(List<ItensPreVenda> itensPreVenda)
         {
