@@ -1,3 +1,4 @@
+using ComandasDB.Data;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -29,7 +30,7 @@ public partial class ItensPreVenda
     [StringLength(1)]
     public string UNICAPR_IPRV { get; set; }
 
-    [StringLength(80)]
+    [StringLength(40)]
     public string OBS_IPRV { get; set; }
 
     public DateTime? DATAHORA_IPRV { get; set; }

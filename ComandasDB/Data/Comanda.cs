@@ -3,12 +3,12 @@ using System.Text;
 
 namespace ComandasDB.Data
 {
-    public class Comanda 
+    public class Comanda
     {
-        public PreVenda PreVenda { get; private set; }
-        public ICollection<ItensPreVenda> ItensPreVenda { get; private set; }
+        public PreVenda PreVenda { get; set; }
+        public List<ItensPreVenda> ItensPreVenda { get; set; }
 
-        public Comanda(PreVenda preVenda, ICollection<ItensPreVenda>itens)
+        public Comanda(PreVenda preVenda, List<ItensPreVenda>itens)
         {
             PreVenda = preVenda;
 

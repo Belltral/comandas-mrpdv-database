@@ -1,3 +1,4 @@
+using ComandasDB.Data;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -161,6 +162,8 @@ public partial class PreVenda
     public string DESCRATEADO { get; set; }
 
     public int? MESA_PRVD { get; set; }
+
+    public string PEDIDOKDS_PRVD { get; set; }
 
     [StringLength(15)]
     public string PLATAFORMA_PDEC { get; set; }
