@@ -1,243 +1,195 @@
-﻿using System;
-using System.Linq;
+﻿using ComandasDB.Data;
+using ComandasDB.Utils;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
-using ComandasDB.Data;
+using System.Threading.Tasks;
 
 namespace ComandasDB
 {
     /// <summary>
-    /// Objeto que compõe os métodos para manipulação de comandas.
+    /// Classe de implementação no cliente.
+    /// <para>Essa classe faz a interface com os componentes mais baixos para simplificar a implementação.</para>
     /// </summary>
     public class Comandas
     {
+        public static string IPAddress = "192.168.0.10";
+
         /// <summary>
-        /// Localiza no banco local da base de comandas uma pre venda de acordo com um número de pre venda fornecido.
+        /// Retorna uma comanda do banco
         /// </summary>
-        /// <param name="numeroPreVenda">Número da pré venda a ser localizada.</param>
-        /// <returns>
-        /// <para>Retorna um objeto PreVenda contendo uma pre venda do banco local da base de comandas.</para>
-        /// Obs.: Pode retornar null.
-        /// </returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static PreVenda GetPreVenda(int numeroPreVenda)
+        /// <param name="comandaNumber">Número da comanda a ser retornada</param>
+        /// <returns></returns>
+        public static async Task<Comanda> GetComanda(int comandaNumber)
         {
-            if (numeroPreVenda <= 0)
+            Request request = new Request()
             {
-                throw new ArgumentException();
-            }
+                RequestType = RequestTypes.DataRequest,
+                IsPreVenda = false,
+                IsItensPreVendas = false,
+                ComandaNumber = comandaNumber,
+            };
 
-            using (var db = new ComandasMRPDVContext())
-            {
-                var selectPreVenda = db.PreVendas.SingleOrDefault(p => p.NUMERO_PRVD == numeroPreVenda);
+            var comanda = await ConnectionsHandler.ClientConnection(IPAddress, request);//.GetAwaiter().GetResult(); //.Result
 
-                return selectPreVenda;
-            }
+            return (Comanda)comanda;
         }
 
         /// <summary>
-        /// Localiza todas as pré vendas da base de dados de comandas.
+        /// Retorna uma Pré Venda do banco
         /// </summary>
-        /// <returns>
-        /// <para>Retorna um objeto List de PreVenda da base de comandas.</para>
-        /// Obs.: Pode retornar um objeto vazio.
-        /// </returns>
-        public static List<PreVenda> GetPreVendas()
+        /// <param name="comandaNumber">Número da comanda a qual pertence a Pré Venda</param>
+        /// <returns></returns>
+        public static async Task<PreVenda> GetPreVenda(int comandaNumber)
         {
-            using (var db = new ComandasMRPDVContext())
+            Request request = new Request
             {
-                var selectPreVenda = db.PreVendas.Select(s => s).ToList();
+                RequestType = RequestTypes.DataRequest,
+                IsPreVenda = true,
+                IsItensPreVendas = false,
+                ComandaNumber = comandaNumber,
+            };
 
-                return selectPreVenda;
-            }
+            var preVenda = await ConnectionsHandler.ClientConnection(IPAddress, request);
+
+            return (PreVenda)preVenda;
         }
 
         /// <summary>
-        /// Recebe um objeto PreVenda e realiza a inserção da pré venda na base de comandas.
+        /// Retorna os produtos de uma comanda específica
         /// </summary>
-        /// <param name="preVenda">Objeto que contém a pré venda a ser inserida.</param>
-        /// /// <exception cref="ArgumentException"></exception>
-        public static void InsertPreVenda(PreVenda preVenda)
+        /// <param name="comandaNumber">Número da comanda a qual os produtos fazem parte</param>
+        /// <returns></returns>
+        public static async Task<List<ItensPreVenda>> GetItensPreVenda(int comandaNumber)
         {
-            if (preVenda.COMANDA_PRVD <= 0)
+            Request request = new Request()
             {
-                throw new ArgumentException();
-            }
+                RequestType = RequestTypes.DataRequest,
+                IsPreVenda = false,
+                IsItensPreVendas = true,
+                ComandaNumber = comandaNumber,
+            };
 
-            using (var db = new ComandasMRPDVContext())
-            {
-                db.PreVendas.Add(preVenda);
-                db.SaveChanges();
-            }
+            var itensPreVenda = await ConnectionsHandler.ClientConnection(IPAddress, request);
+
+            return (List<ItensPreVenda>)itensPreVenda;
         }
 
         /// <summary>
-        /// Localiza os itens de uma pré venda específica através do número de pré venda da base de comandas.
+        /// Verifica se uma comanda já existe na base
         /// </summary>
-        /// <param name="numeroPreVenda">Número da pré venda a ser localizada</param>
-        /// <returns>Retorna um objeto List de ItensPreVenda.
-        /// <para>Obs.: Retorna um objeto List de ItensPreVenda vazio se não forem encontrados resultados.</para>
-        /// </returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static List<ItensPreVenda> GetItensFromPreVenda(int numeroPreVenda)
+        /// <param name="comandaNumber">Número da comanda para verificar sua existência</param>
+        /// <returns>Retorna verdadeiro caso exista uma comanda com o mesmo número ou falso caso não sejam encontrados dados</returns>
+        public static async Task<bool> ComandaExistis(int comandaNumber)
         {
-            if (numeroPreVenda <= 0)
+            Request request = new Request()
             {
-                throw new ArgumentException();
-            }
+                RequestType = RequestTypes.DataCheck,
+                IsPreVenda = false,
+                IsItensPreVendas = false,
+                ComandaNumber = comandaNumber,
+            };
 
-            using (var db = new ComandasMRPDVContext())
-            {
-                var itens = db.ItensPreVendas.Select(s => s).Where(n => n.NUMERO_PRVD == numeroPreVenda).ToList();
+            var check = await ConnectionsHandler.ClientConnection(IPAddress, request);
 
-                return itens;
-            }
+            return (bool)check;
         }
 
         /// <summary>
-        /// Recebe um objeto List de ItensPreVenda para inserir os itens na base de comandas.
+        /// Salva uma comanda na base
         /// </summary>
-        /// <param name="itensPreVenda">Objeto List de ItensPreVenda com os itens a serem inseridos.</param>
-        /// <exception cref="ArgumentException"></exception>
-        public static void InsertItensOfPreVenda(List<ItensPreVenda> itensPreVenda)
+        /// <param name="comanda">Comanda que será salva</param>
+        /// <returns>Retorna verdadeiro caso a comanda seja salva ou falso caso não seja</returns>
+        public static async Task<bool> SaveComanda(Comanda comanda)
         {
-            if (itensPreVenda.Count() == 0)
-            {
-                throw new ArgumentException();
-            }
+            string comandaJson = JsonConvert.SerializeObject(comanda);
 
-            using (var db = new ComandasMRPDVContext())
+            Request request = new Request()
             {
-                db.ItensPreVendas.AddRange(itensPreVenda);
-                db.SaveChanges();
-            }
+                RequestType = RequestTypes.DataSave,
+                IsPreVenda = false,
+                IsItensPreVendas = false,
+            };
+
+            var isComandaSaved = await ConnectionsHandler.ClientConnection(IPAddress, request, comandaJson);
+
+            return (bool)isComandaSaved;
+        }
+        
+        /// <summary>
+        /// Faz a atualização de uma comanda existente na base
+        /// </summary>
+        /// <param name="comanda">Comanda atualizada a ser salva</param>
+        /// <returns></returns>
+        public static async Task<bool> UpdateComanda(Comanda comanda)
+        {
+            string comandaJson = JsonConvert.SerializeObject(comanda);
+
+            Request request = new Request()
+            {
+                RequestType = RequestTypes.DataUpdate,
+                IsPreVenda = false,
+                IsItensPreVendas = false,
+            };
+
+            var update = await ConnectionsHandler.ClientConnection(IPAddress, request, comandaJson);
+
+            return (bool)update;
         }
 
         /// <summary>
-        /// Gera uma comanda do MR PDV com todas as informações da base de comandas (tabelas PreVendas e ItensPreVendas) 
-        /// através de um número de comanda fornecido como parâmetro.
+        /// Remove uma comanda da base de acordo com o número
         /// </summary>
-        /// <param name="numeroComanda">Número da comanda.</param>
-        /// <returns>
-        ///<para>Retorna um objeto Comanda.</para>
-        /// Obs.: Retorna null se a comanda não for encontrada.
-        /// </returns>
-        public static Comanda GetComanda(int numeroComanda)
+        /// <param name="comandaNumber">Número da comanda a ser removida</param>
+        /// <returns>Retorna verdadeiro se o procedimento foi efetuado ou falso caso não exista a comanda informada</returns>
+        public static async Task<bool> DeleteComanda(int comandaNumber)
         {
-            using (var db = new ComandasMRPDVContext())
+            Request request = new Request()
             {
-                var queryPreVenda = db.PreVendas.FirstOrDefault(p => p.COMANDA_PRVD == numeroComanda);
+                RequestType = RequestTypes.DataDelete,
+                IsPreVenda = false,
+                IsItensPreVendas = false,
+                ComandaNumber = comandaNumber
+            };
 
-                if (queryPreVenda == null)
-                {
-                    return null;
-                }
+            var delete = await ConnectionsHandler.ClientConnection(IPAddress, request);
 
-                var numeroPreVenda = queryPreVenda.NUMERO_PRVD;
-                var queryItens = db.ItensPreVendas.Select(i => i).Where(i => i.NUMERO_PRVD == numeroPreVenda).ToList();
-
-                return new Comanda(queryPreVenda, queryItens);
-            }
+            return (bool)delete;
         }
 
         /// <summary>
-        /// Faz a atualização dos produtos e valor de uma comanda ou atualiza todos os dados referentes a comanda.
+        /// Apaga todas as comandas da base
         /// </summary>
-        /// <param name="numeroComanda">Número da comanda que será atualizada.</param>
-        /// <param name="itensAtualizados">Itens atualizados da comanda. Obrigatórios mesmo que eles não sejam alterados.</param>
-        /// <param name="preVendaAtualizada">Pré venda atualizada caso seja necessário.</param>
-        /// <returns>Retorna verdadeiro se o procedimento foi efetuado ou falso caso não exista a comanda informada.</returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static bool UpdateComanda(int numeroComanda, List<ItensPreVenda> itensAtualizados, 
-            PreVenda preVendaAtualizada = null)
+        /// <returns>Retorna verdadeiro caso as comandas forem apagadas</returns>
+        public static async Task<bool> DeleteAllComandas()
         {
-            if (numeroComanda <= 0 || itensAtualizados.Count <= 0)
+            Request request = new Request()
             {
-                throw new ArgumentException();
-            }
+                RequestType = RequestTypes.DataDeleteAll,
+                IsPreVenda = false,
+                IsItensPreVendas = false,
+            };
 
-            using (var db = new ComandasMRPDVContext())
-            {
-                var preVenda = db.PreVendas.SingleOrDefault(p => p.COMANDA_PRVD == numeroComanda);
+            var deleteAll = await ConnectionsHandler.ClientConnection(IPAddress, request);
 
-                if (preVenda is null)
-                {
-                    return false;
-                }
-
-                int numeroPreVenda = preVenda.NUMERO_PRVD;
-
-                var oldItens = db.ItensPreVendas.Select(i => i).Where(i => i.NUMERO_PRVD == numeroPreVenda);
-                db.ItensPreVendas.RemoveRange(oldItens);
-
-                if (!(preVendaAtualizada is null))
-                {
-                    var oldPreVenda = db.PreVendas.SingleOrDefault(p => p.NUMERO_PRVD == numeroPreVenda);
-
-                    db.PreVendas.Remove(oldPreVenda);
-
-                    db.PreVendas.Add(preVendaAtualizada);
-
-                    db.SaveChanges();
-
-                    var newPreVenda = db.PreVendas.SingleOrDefault(p => p.COMANDA_PRVD == numeroComanda);
-
-                    foreach (var item in itensAtualizados)
-                    {
-                        item.NUMERO_PRVD = newPreVenda.NUMERO_PRVD;
-                    }
-
-                    db.ItensPreVendas.AddRange(itensAtualizados);
-
-                    db.SaveChanges();
-
-                    return true;
-                }
-
-                db.ItensPreVendas.AddRange(itensAtualizados);
-
-                decimal? novoValor = 0;
-                foreach (var valor in itensAtualizados)
-                {
-                    novoValor += (valor.PRECO_IPRV * valor.QTDE_IPRV);
-                }
-
-                preVenda.VALOR_PRVD = novoValor;
-
-                db.SaveChanges();
-
-                return true;
-            }
+            return (bool)deleteAll;
         }
 
         /// <summary>
-        /// Remove uma comanda (pré venda e itens) do banco.
+        /// Finaliza a escuta do servidor que aceita as requisições dos clientes para a base de comandas.
+        /// <para>Deve ser implementado ao finalizar o PDV manualmente.</para>
         /// </summary>
-        /// <param name="numeroComanda">Número da comanda que será removida.</param>
-        /// <returns>Retorna verdadeiro se o procedimento foi efetuado ou falso caso não exista a comanda informada.</returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static bool DeleteComanda(int numeroComanda)
+        public static void CloseServerConnection()
         {
-            if (numeroComanda <= 0)
-            {
-                throw new ArgumentException();
-            }
+            ConnectionsHandler.StopServer();
+        }
 
-            using (var db = new ComandasMRPDVContext())
-            {
-                var preVenda = db.PreVendas.SingleOrDefault(p => p.COMANDA_PRVD == numeroComanda);
-                var itensComanda = db.ItensPreVendas.Select(i => i).Where(p => p.NUMERO_PRVD == preVenda.NUMERO_PRVD);
-
-                if (preVenda is null)
-                {
-                    return false;
-                }
-
-                db.PreVendas.Remove(preVenda);
-                db.ItensPreVendas.RemoveRange(itensComanda);
-                db.SaveChanges();
-
-                return true;
-            }
+        /// <summary>
+        /// Inicia o servidor de comandas para escutar as requisições
+        /// </summary>
+        public static async Task InitiateServer()
+        {
+            await ConnectionsHandler.ServerConnection();
         }
     }
 }
