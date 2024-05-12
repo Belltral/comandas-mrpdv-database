@@ -60,6 +60,10 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.1.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -72,13 +76,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comandas.cs" />
+    <Compile Include="ComandasHandler\ComandasHandler.cs" />
+    <Compile Include="Context\ComandasDbContext.cs" />
     <Compile Include="Data\Comanda.cs" />
-    <Compile Include="Data\ComandasMRPDVContext.cs" />
-    <Compile Include="Data\DataMRPDVContext.cs" />
-    <Compile Include="Data\Internal\RetrieveFromMRPDV.cs" />
+    <Compile Include="Context\DataMRPDVContext.cs" />
+    <Compile Include="Data\Entities\GeneralEntities\Parametros.cs" />
+    <Compile Include="Utils\Internal\RetrieveFromMRPDV.cs" />
+    <Compile Include="Utils\DbChanger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tables\ItensPreVenda.cs" />
-    <Compile Include="Tables\PreVenda.cs" />
+    <Compile Include="Data\Entities\ItensPreVenda.cs" />
+    <Compile Include="Data\Entities\PreVenda.cs" />
+    <Compile Include="Utils\ConnectionsHandler.cs" />
+    <Compile Include="Utils\Request.cs" />
+    <Compile Include="Utils\RequestTypes.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
