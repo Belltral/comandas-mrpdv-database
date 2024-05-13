@@ -75,14 +75,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Comandas.cs" />
+    <Compile Include="ComandaInstance.cs" />
+    <Compile Include="Instances\ComandasLocal.cs" />
+    <Compile Include="Instances\ComandasServer.cs" />
     <Compile Include="ComandasHandler\ComandasHandler.cs" />
     <Compile Include="Context\ComandasDbContext.cs" />
     <Compile Include="Data\Comanda.cs" />
     <Compile Include="Context\DataMRPDVContext.cs" />
     <Compile Include="Data\Entities\GeneralEntities\Parametros.cs" />
+    <Compile Include="Data\Entities\GeneralEntities\Pdvs.cs" />
     <Compile Include="Utils\Internal\RetrieveFromMRPDV.cs" />
-    <Compile Include="Utils\DbChanger.cs" />
+    <Compile Include="Instances\IComandas.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\Entities\ItensPreVenda.cs" />
     <Compile Include="Data\Entities\PreVenda.cs" />

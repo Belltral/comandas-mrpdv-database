@@ -1,26 +1,29 @@
 ﻿using ComandasDB.Data;
 using ComandasDB.Utils;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ComandasDB
 {
     /// <summary>
-    /// Classe de implementação no cliente.
-    /// <para>Essa classe faz a interface com os componentes mais baixos para simplificar a implementação.</para>
+    /// Classe que controla as requisições para a base no servidor
     /// </summary>
-    public class Comandas
+    public class ComandasServer : IComandas
     {
-        public static string IPAddress = "192.168.0.10";
+        public string IPAddress { get; set; }
+
+        public ComandasServer(string serverIp)
+        {
+            IPAddress = serverIp;
+        }
 
         /// <summary>
-        /// Retorna uma comanda do banco
+        /// Localiza uma comanda no banco do servidor de acordo com o número de comanda fornecido
         /// </summary>
         /// <param name="comandaNumber">Número da comanda a ser retornada</param>
-        /// <returns></returns>
-        public static async Task<Comanda> GetComanda(int comandaNumber)
+        /// <returns>Retorna uma comanda do banco pelo servidor de comandas</returns>
+        public async Task<Comanda> GetComanda(int comandaNumber)
         {
             Request request = new Request()
             {
@@ -36,11 +39,11 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Retorna uma Pré Venda do banco
+        /// Retorna uma Pré Venda do banco do servidor de acordo com o número de comanda fornecido
         /// </summary>
         /// <param name="comandaNumber">Número da comanda a qual pertence a Pré Venda</param>
         /// <returns></returns>
-        public static async Task<PreVenda> GetPreVenda(int comandaNumber)
+        public async Task<PreVenda> GetPreVenda(int comandaNumber)
         {
             Request request = new Request
             {
@@ -56,11 +59,11 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Retorna os produtos de uma comanda específica
+        /// Retorna os produtos de uma comanda específica do servidor de acordo com o número de comanda
         /// </summary>
         /// <param name="comandaNumber">Número da comanda a qual os produtos fazem parte</param>
         /// <returns></returns>
-        public static async Task<List<ItensPreVenda>> GetItensPreVenda(int comandaNumber)
+        public async Task<List<ItensPreVenda>> GetItensPreVenda(int comandaNumber)
         {
             Request request = new Request()
             {
@@ -76,11 +79,11 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Verifica se uma comanda já existe na base
+        /// Verifica se uma comanda já existe na base do servidor
         /// </summary>
         /// <param name="comandaNumber">Número da comanda para verificar sua existência</param>
         /// <returns>Retorna verdadeiro caso exista uma comanda com o mesmo número ou falso caso não sejam encontrados dados</returns>
-        public static async Task<bool> ComandaExistis(int comandaNumber)
+        public async Task<bool> ComandaExistis(int comandaNumber)
         {
             Request request = new Request()
             {
@@ -96,11 +99,11 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Salva uma comanda na base
+        /// Salva uma comanda na base do servidor
         /// </summary>
         /// <param name="comanda">Comanda que será salva</param>
         /// <returns>Retorna verdadeiro caso a comanda seja salva ou falso caso não seja</returns>
-        public static async Task<bool> SaveComanda(Comanda comanda)
+        public async Task<bool> SaveComanda(Comanda comanda)
         {
             string comandaJson = JsonConvert.SerializeObject(comanda);
 
@@ -117,11 +120,11 @@ namespace ComandasDB
         }
         
         /// <summary>
-        /// Faz a atualização de uma comanda existente na base
+        /// Faz a atualização de uma comanda existente na base do servidor
         /// </summary>
         /// <param name="comanda">Comanda atualizada a ser salva</param>
-        /// <returns></returns>
-        public static async Task<bool> UpdateComanda(Comanda comanda)
+        /// <returns>Retorna verdadeiro caso a comanda seja atualizada</returns>
+        public async Task<bool> UpdateComanda(Comanda comanda)
         {
             string comandaJson = JsonConvert.SerializeObject(comanda);
 
@@ -138,11 +141,11 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Remove uma comanda da base de acordo com o número
+        /// Remove uma comanda da base do servidor de acordo com o número
         /// </summary>
         /// <param name="comandaNumber">Número da comanda a ser removida</param>
         /// <returns>Retorna verdadeiro se o procedimento foi efetuado ou falso caso não exista a comanda informada</returns>
-        public static async Task<bool> DeleteComanda(int comandaNumber)
+        public async Task<bool> DeleteComanda(int comandaNumber)
         {
             Request request = new Request()
             {
@@ -158,10 +161,10 @@ namespace ComandasDB
         }
 
         /// <summary>
-        /// Apaga todas as comandas da base
+        /// Apaga todas as comandas da base do servidor
         /// </summary>
         /// <returns>Retorna verdadeiro caso as comandas forem apagadas</returns>
-        public static async Task<bool> DeleteAllComandas()
+        public async Task<bool> DeleteAllComandas()
         {
             Request request = new Request()
             {
@@ -179,7 +182,7 @@ namespace ComandasDB
         /// Finaliza a escuta do servidor que aceita as requisições dos clientes para a base de comandas.
         /// <para>Deve ser implementado ao finalizar o PDV manualmente.</para>
         /// </summary>
-        public static void CloseServerConnection()
+        public void CloseServerConnection()
         {
             ConnectionsHandler.StopServer();
         }
