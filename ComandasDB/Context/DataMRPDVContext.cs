@@ -1,3 +1,4 @@
+using ComandasDB;
 using System.Data.Entity;
 
 public partial class DataMRPDVContext : DbContext
@@ -9,6 +10,8 @@ public partial class DataMRPDVContext : DbContext
 
     public virtual DbSet<ItensPreVenda> ItensPreVendas { get; set; }
     public virtual DbSet<PreVenda> PreVendas { get; set; }
+    public virtual DbSet<Parametros> Parametros { get; set; }
+    public virtual DbSet<Pdvs> Pdvs { get; set; }
 
     protected override void OnModelCreating(DbModelBuilder modelBuilder)
     {
