@@ -43,6 +43,8 @@ namespace ComandasDB.Data.Internal
             return itensPreVendas;
         }
 
+        // TODO: validação de números de comandas repetidos quando é implementado o servidor
+        // em PDVs que não tinham o servidor padrão anteriormente
         internal static void RetriveFromMRToComandas()
         {
             var preVendas = GetPreVendasFromMRPDV();
@@ -80,17 +82,23 @@ namespace ComandasDB.Data.Internal
             }
         }
 
-        internal static string GetServerAddress()
+        internal static Parametros GetServerInfo()
         {
             using (var db = new DataMRPDVContext())
             {
-                var query = "SELECT VALOR_PAR, TEXTO_PAR FROM Parametros WHERE ID_TPPR = 228";
+                var query = db.Parametros.SingleOrDefault(p => p.ID_TPPR == 228);
 
-                var results = db.Database.SqlQuery<Parametros>(query).ToList();
+                return query;
+            }
+        }
 
-                var serverAddress = results[0].TEXTO_PAR;
+        internal static Pdvs PdvInfo()
+        {
+            using (var db = new DataMRPDVContext())
+            {
+                var query = db.Pdvs.FirstOrDefault();
 
-                return serverAddress;
+                return query;
             }
         }
     }
