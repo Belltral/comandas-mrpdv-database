@@ -15,8 +15,6 @@ namespace ComandasDB.Context
             {
                 try
                 {
-                    AppDomain.CurrentDomain.SetData("DataDirectory", dataDirectory);
-
                     Database.SetInitializer(new CreateDatabaseIfNotExists<ComandasDbContext>());
                     Database.Initialize(false);
 
@@ -35,7 +33,6 @@ namespace ComandasDB.Context
 
         public virtual DbSet<ItensPreVenda> ItensPreVendas { get; set; }
         public virtual DbSet<PreVenda> PreVendas { get; set; }
-        //public virtual DbSet<Parametros> Parametros { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
